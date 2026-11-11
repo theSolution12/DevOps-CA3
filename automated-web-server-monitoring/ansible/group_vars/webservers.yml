@@ -1,0 +1,8 @@
+---
+# Target-specific variables for Webserver deployment
+web_doc_root: /var/www/html
+web_user: www-data
+web_group: www-data
+local_website_src: ../website
+nagios_port: 8080
+

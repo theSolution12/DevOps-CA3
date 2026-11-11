@@ -1,0 +1,190 @@
+---
+- name: Automated Web Server Deployment and Monitoring Configuration
+  hosts: webservers
+  become: true
+  gather_facts: true
+
+  vars:
+    web_doc_root: /var/www/html
+    web_user: www-data
+    web_group: www-data
+    local_website_src: ../website
+    puppet_manifest_dest: /etc/puppet/code/environments/production/manifests/site.pp
+    nagios_admin_user: nagiosadmin
+    nagios_admin_pass: DevopsAdmin2026!
+
+  tasks:
+    - name: Update apt cache and install core prerequisites
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+        pkg:
+          - curl
+          - git
+          - puppet
+          - apache2-utils
+        state: present
+      tags:
+        - prerequisites
+
+    - name: Ensure Puppet manifests directory exists
+      file:
+        path: /etc/puppet/code/environments/production/manifests
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      tags:
+        - puppet
+
+    - name: Copy Puppet manifest to target
+      copy:
+        src: ../puppet/manifests/site.pp
+        dest: "{{ puppet_manifest_dest }}"
+        owner: root
+        group: root
+        mode: '0644'
+      tags:
+        - puppet
+
+    - name: Execute Puppet to enforce Nginx package, config, and running state
+      command: puppet apply {{ puppet_manifest_dest }}
+      register: puppet_first_run
+      changed_when: "'Notice: Applied catalog' in puppet_first_run.stdout"
+      tags:
+        - puppet
+
+    - name: Deploy static website files (Ansible-owned)
+      copy:
+        src: "{{ local_website_src }}/{{ item }}"
+        dest: "{{ web_doc_root }}/{{ item }}"
+        owner: "{{ web_user }}"
+        group: "{{ web_group }}"
+        mode: '0644'
+      loop:
+        - index.html
+        - style.css
+      tags:
+        - deploy
+        - web
+
+    - name: Verify Nginx is serving the website locally on target
+      uri:
+        url: http://127.0.0.1/
+        return_content: true
+        status_code: 200
+      register: webpage_content
+      failed_when: "'DevOps Web Server Configuration and Monitoring' not in webpage_content.content"
+      tags:
+        - verify
+
+    - name: Install Nagios Core and Monitoring Plugins
+      apt:
+        pkg:
+          - nagios4
+          - nagios-plugins
+          - monitoring-plugins-basic
+          - apache2
+        state: present
+      tags:
+        - nagios
+
+    - name: Configure Apache to listen on port 8080 (leaving port 80 dedicated to Nginx)
+      lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: '^Listen 80$'
+        line: 'Listen 8080'
+      register: apache_ports
+      tags:
+        - nagios
+
+    - name: Update Apache default VirtualHost to port 8080
+      lineinfile:
+        path: /etc/apache2/sites-available/000-default.conf
+        regexp: '^<VirtualHost \*:80>'
+        line: '<VirtualHost *:8080>'
+      register: apache_vhost
+      tags:
+        - nagios
+
+    - name: Enable Apache CGI module for Nagios web interface
+      command: a2enmod cgi
+      register: a2enmod_cgi
+      changed_when: "'already enabled' not in a2enmod_cgi.stdout"
+      tags:
+        - nagios
+
+    - name: Configure Nagios monitoring target for Web Server
+      copy:
+        src: ../nagios/configs/web-server.cfg
+        dest: /etc/nagios4/conf.d/web-server.cfg
+        owner: root
+        group: root
+        mode: '0644'
+      register: nagios_conf
+      tags:
+        - nagios
+
+    - name: Set up Nagios admin credentials file
+      command: htpasswd -b -c /etc/nagios4/htpasswd.users {{ nagios_admin_user }} {{ nagios_admin_pass }}
+      changed_when: false
+      tags:
+        - nagios
+
+    - name: Configure Apache authentication and alias for Nagios web interface
+      copy:
+        dest: /etc/apache2/conf-available/nagios4-cgi.conf
+        content: |
+          ScriptAlias /cgi-bin/nagios4 /usr/lib/cgi-bin/nagios4
+          ScriptAlias /nagios4/cgi-bin /usr/lib/cgi-bin/nagios4
+          ScriptAlias /nagios/cgi-bin /usr/lib/cgi-bin/nagios4
+
+          Alias /nagios4/stylesheets /etc/nagios4/stylesheets
+          Alias /nagios/stylesheets /etc/nagios4/stylesheets
+
+          Alias /nagios4 /usr/share/nagios4/htdocs
+          Alias /nagios /usr/share/nagios4/htdocs
+
+          <DirectoryMatch (/usr/share/nagios4/htdocs|/usr/lib/cgi-bin/nagios4|/etc/nagios4/stylesheets)>
+              Options FollowSymLinks ExecCGI
+              DirectoryIndex index.php index.html
+              AllowOverride AuthConfig
+
+              AuthType Basic
+              AuthName "Nagios Core Access"
+              AuthUserFile /etc/nagios4/htpasswd.users
+              Require valid-user
+          </DirectoryMatch>
+
+          <Directory /usr/share/nagios4/htdocs>
+              Options +ExecCGI
+          </Directory>
+        owner: root
+        group: root
+        mode: '0644'
+      register: nagios_apache_conf
+      tags:
+        - nagios
+
+    - name: Restart Apache2 service on port 8080
+      service:
+        name: apache2
+        state: restarted
+        enabled: true
+      tags:
+        - nagios
+
+    - name: Validate Nagios configuration syntax
+      command: nagios4 -v /etc/nagios4/nagios.cfg
+      register: nagios_validation
+      changed_when: false
+      tags:
+        - nagios
+
+    - name: Restart Nagios4 service
+      service:
+        name: nagios4
+        state: restarted
+        enabled: true
+      tags:
+        - nagios

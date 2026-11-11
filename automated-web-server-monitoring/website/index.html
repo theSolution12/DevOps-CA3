@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Web Server Configuration and Monitoring</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>DevOps Web Server Configuration and Monitoring</h1>
+      <p class="subtitle">Automated Multi-Tool Deployment & Continuous Monitoring Demonstration</p>
+      <div class="meta-badge">
+        <span><strong>Student:</strong> Parth Patidar</span> |
+        <span><strong>Reg. No.:</strong> 12316831</span> |
+        <span><strong>Course:</strong> INT333</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card status-card">
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <h2>System Status: Active & Operational</h2>
+      </div>
+      <p>This static website is served directly by <strong>Nginx HTTP Server</strong> running on an automated Ubuntu cloud target. Its package, configuration, and service states are strictly enforced by <strong>Puppet</strong>, deployed by <strong>Ansible</strong>, and health-monitored in real time by <strong>Nagios Core</strong>.</p>
+    </section>
+
+    <section class="card">
+      <h2>Project Purpose</h2>
+      <p>This project demonstrates a production-grade, multi-tool DevOps automation pipeline built on single-responsibility principles without tool overlap or container orchestration.</p>
+      <ul>
+        <li><strong>Zero Tool Conflict:</strong> Each tool has a clear, non-overlapping ownership boundary.</li>
+        <li><strong>Infrastructure as Code:</strong> Entire target environment provisioned reproducibly via Terraform.</li>
+        <li><strong>Configuration Idempotency:</strong> Puppet continuously converges Nginx to its desired state.</li>
+        <li><strong>Automated Delivery:</strong> Ansible securely deploys website artifacts and configures dependencies.</li>
+        <li><strong>Proactive Health Monitoring:</strong> Nagios Core executes active HTTP availability checks.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>DevOps Toolchain & Architecture</h2>
+      <div class="toolchain-grid">
+        <div class="tool-box">
+          <div class="tool-name">Terraform</div>
+          <div class="tool-role">Infrastructure Provisioner</div>
+          <p>Provisions one Ubuntu target in AWS EC2 (t2.micro), security groups, and key pairs.</p>
+        </div>
+        <div class="tool-box">
+          <div class="tool-name">Puppet</div>
+          <div class="tool-role">Desired State Engine</div>
+          <p>Enforces Nginx package installation, configuration integrity, and running service state.</p>
+        </div>
+        <div class="tool-box">
+          <div class="tool-name">Ansible</div>
+          <div class="tool-role">Configuration & Deployer</div>
+          <p>Installs prerequisites and deploys the static website artifacts via SSH.</p>
+        </div>
+        <div class="tool-box">
+          <div class="tool-name">Nagios Core</div>
+          <div class="tool-role">Availability Monitor</div>
+          <p>Performs real HTTP polling, verifies service uptime, and alerts on service degradation.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Parth Patidar (Reg. No. 12316831). Automated DevOps Web Server & Monitoring Project.</p>
+    </div>
+  </footer>
+</body>
+</html>
+
