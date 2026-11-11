@@ -13,7 +13,7 @@ Operator / Presentation Client (Control Node)
        |
        | Terraform (Infrastructure as Code)
        v
-One Ubuntu Target Server (AWS EC2 t2.micro, ap-south-1)
+One Ubuntu Target Server (AWS EC2 t3.micro, ap-south-1)
        |
        +-- Puppet Manifest (Enforces Nginx package, config, service running)
        |
