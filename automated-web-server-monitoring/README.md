@@ -40,6 +40,7 @@ One Ubuntu Target Server (AWS EC2 t3.micro, ap-south-1)
 automated-web-server-monitoring/
 ├── README.md
 ├── bootstrap-control-node.sh
+├── cleanup.sh
 ├── terraform/
 │   ├── versions.tf
 │   ├── provider.tf
@@ -97,4 +98,16 @@ To demonstrate active monitoring:
    ssh -i id_rsa ubuntu@<TARGET_PUBLIC_IP> "sudo systemctl start nginx"
    ```
    *Nagios HTTP check recovers from CRITICAL back to OK.*
+
+---
+
+## 5. Teardown & Safe Cleanup
+To terminate all AWS EC2 resources and purge all local runtime-generated files (`id_rsa`, `inventory.ini`, `*.tfstate`):
+```bash
+./cleanup.sh
+```
+Or manually via Terraform:
+```bash
+cd terraform && terraform destroy -auto-approve
+```
 
