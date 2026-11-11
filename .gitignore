@@ -1,14 +1,27 @@
-# Environment & secrets
+# ==============================================================================
+# Git Ignore: Runtime & Generated Artifacts
+# ==============================================================================
+
+# Credentials & environment
 .env
+*.env
 *.pem
 *.key
 id_rsa
 id_rsa.pub
 
-# Terraform
+# Generated Runtime Files (created during terraform apply)
+**/ansible/inventory.ini
+automated-web-server-monitoring/id_rsa
+evidence/
+**/evidence/*
+
+# Terraform runtime & state
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+*.tfplan
+tfplan
 crash.log
 override.tf
 override.tf.json
@@ -17,14 +30,12 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Ansible
+# Ansible runtime
 *.retry
+.ansible/
 
-# OS / Editor
+# OS / Editor temporary files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
-
-*.tfplan
-tfplan

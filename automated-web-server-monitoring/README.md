@@ -48,7 +48,6 @@ automated-web-server-monitoring/
 │   └── outputs.tf
 ├── ansible/
 │   ├── ansible.cfg
-│   ├── inventory.ini
 │   ├── inventory.ini.example
 │   ├── playbook.yml
 │   └── group_vars/webservers.yml
@@ -57,11 +56,9 @@ automated-web-server-monitoring/
 ├── nagios/
 │   ├── README.md
 │   └── configs/web-server.cfg
-├── website/
-│   ├── index.html
-│   └── style.css
-└── evidence/
-    └── test-results.md
+└── website/
+    ├── index.html
+    └── style.css
 ```
 
 ---
