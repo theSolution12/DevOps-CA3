@@ -96,3 +96,13 @@ resource "aws_instance" "web" {
   }
 }
 
+# Automatically generate the Ansible inventory with the provisioned EC2 Public IP
+resource "local_file" "ansible_inventory" {
+  content         = <<-EOT
+    [webservers]
+    target-node ansible_host=${aws_instance.web.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=../id_rsa
+  EOT
+  filename        = "${path.module}/../ansible/inventory.ini"
+  file_permission = "0644"
+}
+
