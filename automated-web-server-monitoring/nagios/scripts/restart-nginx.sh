@@ -16,11 +16,17 @@ logger -t nagios-event-handler "Nagios Event: HTTP State=$STATE, Type=$STATETYPE
 
 case "$STATE" in
 CRITICAL|WARNING)
-    logger -t nagios-event-handler "Outage detected ($STATE/$STATETYPE). Holding for 30s so alert is visible on dashboard before healing..."
-    sleep 30
+    logger -t nagios-event-handler "Outage detected ($STATE/$STATETYPE). Waiting 10s before healing..."
+    sleep 10
+
+    # Enforce state via Puppet
     PUPPET_BIN="$(command -v puppet 2>/dev/null || echo '/usr/bin/puppet')"
     OUTPUT=$(sudo "$PUPPET_BIN" apply "$PUPPET_MANIFEST" 2>&1)
     logger -t nagios-event-handler "Puppet remediation output: $OUTPUT"
+
+    # Ensure Nginx is running as safety fallback
+    sudo /usr/bin/systemctl start nginx
+    logger -t nagios-event-handler "Self-healing completed. Nginx running."
     ;;
 OK)
     logger -t nagios-event-handler "Service is healthy (OK)."

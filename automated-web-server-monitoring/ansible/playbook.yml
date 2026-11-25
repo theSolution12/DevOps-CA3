@@ -122,6 +122,14 @@
       tags:
         - nagios
 
+    - name: Increase Nagios event handler timeout to 60 seconds
+      lineinfile:
+        path: /etc/nagios4/nagios.cfg
+        regexp: '^event_handler_timeout='
+        line: 'event_handler_timeout=60'
+      tags:
+        - nagios
+
     - name: Allow nagios user to execute Puppet and manage services with sudo without password
       copy:
         dest: /etc/sudoers.d/nagios_restart_nginx
