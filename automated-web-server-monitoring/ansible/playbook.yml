@@ -114,6 +114,46 @@
       tags:
         - nagios
 
+    - name: Ensure Nagios event handlers are enabled in nagios.cfg
+      lineinfile:
+        path: /etc/nagios4/nagios.cfg
+        regexp: '^enable_event_handlers='
+        line: 'enable_event_handlers=1'
+      tags:
+        - nagios
+
+    - name: Allow nagios user to restart nginx without password for self-healing
+      copy:
+        dest: /etc/sudoers.d/nagios_restart_nginx
+        content: |
+          nagios ALL=(ALL) NOPASSWD: /usr/bin/systemctl start nginx, /usr/bin/systemctl restart nginx
+        owner: root
+        group: root
+        mode: '0440'
+        validate: '/usr/sbin/visudo -cf %s'
+      tags:
+        - nagios
+
+    - name: Ensure Nagios eventhandlers directory exists
+      file:
+        path: /usr/lib/nagios/plugins/eventhandlers
+        state: directory
+        owner: nagios
+        group: nagios
+        mode: '0755'
+      tags:
+        - nagios
+
+    - name: Deploy Nagios automated self-healing event handler script
+      copy:
+        src: ../nagios/scripts/restart-nginx.sh
+        dest: /usr/lib/nagios/plugins/eventhandlers/restart-nginx.sh
+        owner: nagios
+        group: nagios
+        mode: '0755'
+      tags:
+        - nagios
+
     - name: Configure Nagios monitoring target for Web Server
       copy:
         src: ../nagios/configs/web-server.cfg
