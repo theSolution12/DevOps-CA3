@@ -16,7 +16,8 @@ logger -t nagios-event-handler "Nagios Event: HTTP State=$STATE, Type=$STATETYPE
 
 case "$STATE" in
 CRITICAL|WARNING)
-    logger -t nagios-event-handler "Outage detected ($STATE/$STATETYPE). Triggering Puppet to enforce desired state..."
+    logger -t nagios-event-handler "Outage detected ($STATE/$STATETYPE). Holding for 30s so alert is visible on dashboard before healing..."
+    sleep 30
     PUPPET_BIN="$(command -v puppet 2>/dev/null || echo '/usr/bin/puppet')"
     OUTPUT=$(sudo "$PUPPET_BIN" apply "$PUPPET_MANIFEST" 2>&1)
     logger -t nagios-event-handler "Puppet remediation output: $OUTPUT"
