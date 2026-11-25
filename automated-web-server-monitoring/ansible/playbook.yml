@@ -122,11 +122,11 @@
       tags:
         - nagios
 
-    - name: Allow nagios user to restart nginx without password for self-healing
+    - name: Allow nagios user to execute Puppet and manage services with sudo without password
       copy:
         dest: /etc/sudoers.d/nagios_restart_nginx
         content: |
-          nagios ALL=(ALL) NOPASSWD: /usr/bin/systemctl start nginx, /usr/bin/systemctl restart nginx
+          nagios ALL=(ALL) NOPASSWD: /usr/bin/puppet, /opt/puppetlabs/bin/puppet, /usr/bin/systemctl start nginx, /usr/bin/systemctl restart nginx
         owner: root
         group: root
         mode: '0440'
